@@ -18,6 +18,11 @@ public class ScoreComputer {
         return scoreComputer;
     }
 
+    /**
+     * Computes the score: if a call to Amazon's API didn't bring new results, it didn't search on new tiers.
+     * @param input
+     * @return score
+     */
     public int getScore(String input) {
         Map<String, Integer> phrases = new HashMap<>();
         List<String> completions = apiWebClient.apiCall(REQUEST_PATH+input);
@@ -31,7 +36,7 @@ public class ScoreComputer {
         int newFounds = 0;
         int score = calculateScore(completions, input, 0 ,0, 0);
         while((times < maxTimes) && (times < input.length())) {
-            completions = apiWebClient.apiCall("/search/complete?search-alias=aps&mkt=1&q="+input.substring(0, times+1));
+            completions = apiWebClient.apiCall(REQUEST_PATH+input.substring(0, times+1));
             newFounds = checkTiers(phrases, completions, maxTier);
             if (newFounds > 0) {
                 maxTier++;
@@ -47,6 +52,15 @@ public class ScoreComputer {
         return score;
     }
 
+    /**
+     * Once it has all the data needed and the keyword was found, it calculates the score
+     * @param completions
+     * @param input
+     * @param maxTier
+     * @param addedTiers
+     * @param maxScore
+     * @return score
+     */
     private int calculateScore(List<String> completions, String input, int maxTier, int addedTiers, int maxScore) {
         int score = maxScore - (maxTier+addedTiers)*10;
         int max = completions.size();
@@ -68,6 +82,15 @@ public class ScoreComputer {
         return false;
     }
 
+    /**
+     * Keeps the phrases found with it's corresponding tier.
+     * Removes the phrases that don't come up anymore on the result.
+     * Returns how many new phrases where retrieved from Amazon's API
+     * @param phrases
+     * @param completions
+     * @param maxTier
+     * @return newFounds
+     */
     private int checkTiers(Map<String, Integer> phrases, List<String> completions, int maxTier) {
         int newFounds = 0;
         for (String c : completions) {
