@@ -1,0 +1,17 @@
+# Compiled class file
+*.class
+
+#Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+.classpath
+.project
+.settings/
+
